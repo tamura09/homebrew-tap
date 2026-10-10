@@ -1,0 +1,73 @@
+name: Test
+
+on:
+  # No paths filter: Test is a required check, so it has to report on every PR,
+  # or a docs-only PR could never merge.
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: "1"
+  HOMEBREW_NO_ANALYTICS: "1"
+  HOMEBREW_NO_ENV_HINTS: "1"
+  HOMEBREW_NO_INSTALL_CLEANUP: "1"
+
+jobs:
+  test:
+    name: Test
+    # Not after the merge: a change reaches main through a PR that has already
+    # run this check.
+    if: ${{ github.event_name == 'pull_request' || github.ref != 'refs/heads/main' }}
+    # Casks are macOS-only. The image ships Homebrew, so no setup action is
+    # needed (Homebrew/actions is not on the account's allowed list either).
+    runs-on: macos-26
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      # Homebrew loads taps from its Taps directory, so link the checkout there.
+      # Since Homebrew 6, a non-official tap has to be trusted before it is loaded.
+      - name: Set up the tap
+        run: |
+          brew --version
+          taps="$(brew --repository)/Library/Taps/tamura09"
+          mkdir -p "$taps"
+          ln -s "$GITHUB_WORKSPACE" "$taps/homebrew-tap"
+          brew trust tamura09/tap
+
+      - name: Style
+        run: brew style tamura09/tap
+
+      # Not --new: that adds homebrew/cask submission rules (GitHub notability,
+      # notarization) that this tap deliberately does not meet.
+      #
+      # --online calls the GitHub API. Unauthenticated, that shares a 60/hour
+      # limit per runner IP and fails, so pass the job's read-only token.
+      - name: Audit
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ github.token }}
+        run: brew audit --tap tamura09/tap --strict --online
+
+      # Downloads each cask's artifact, checks its sha256, installs it and
+      # removes it again.
+      - name: Install
+        run: |
+          for cask in Casks/*.rb; do
+            name="tamura09/tap/$(basename "$cask" .rb)"
+            brew install --cask "$name"
+            brew uninstall --cask "$name"
+          done
