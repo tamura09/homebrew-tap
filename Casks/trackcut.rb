@@ -1,6 +1,6 @@
 cask "trackcut" do
-  version "0.2.0"
-  sha256 "bc75657f8930beb6c3bc362f3ab89993d44349d4efd453a4e4381e86d78db459"
+  version "0.3.0"
+  sha256 "50dedcc117ddacb2d5e2ac268e79e719ac4b1c787a16d94171bf15cdcdd88892"
 
   url "https://github.com/tamura09/trackcut/releases/download/v#{version}/TrackCut-#{version}-arm64.zip"
   name "TrackCut"
@@ -12,6 +12,7 @@ cask "trackcut" do
     strategy :github_latest
   end
 
+  auto_updates true
   depends_on arch: :arm64
   depends_on macos: :sequoia
 
