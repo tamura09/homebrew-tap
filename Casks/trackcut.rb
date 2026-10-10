@@ -1,6 +1,6 @@
 cask "trackcut" do
-  version "0.1.0"
-  sha256 "b32d956dd5bbc02239e0684ad06ce96eb9de46f8984dccac8edf492f85af752f"
+  version "0.2.0"
+  sha256 "bc75657f8930beb6c3bc362f3ab89993d44349d4efd453a4e4381e86d78db459"
 
   url "https://github.com/tamura09/trackcut/releases/download/v#{version}/TrackCut-#{version}-arm64.zip"
   name "TrackCut"
@@ -17,7 +17,12 @@ cask "trackcut" do
 
   app "TrackCut.app"
 
-  zap trash: "~/Library/Preferences/wtf.tmrh.TrackCut.plist"
+  zap trash: [
+    "~/Library/Caches/com.9tmr.TrackCut",
+    "~/Library/HTTPStorages/com.9tmr.TrackCut",
+    "~/Library/Preferences/com.9tmr.TrackCut.plist",
+    "~/Library/Preferences/wtf.tmrh.TrackCut.plist",
+  ]
 
   caveats <<~EOS
     TrackCut is ad-hoc signed and not notarized, so macOS blocks it the first time.
