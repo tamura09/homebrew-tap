@@ -1,6 +1,6 @@
 cask "trackcut" do
-  version "0.3.0"
-  sha256 "50dedcc117ddacb2d5e2ac268e79e719ac4b1c787a16d94171bf15cdcdd88892"
+  version "0.4.0"
+  sha256 "68b162be8c9a1c210d5776cac42e3835e8f93bc15f50e718bbbf37d3c8565734"
 
   url "https://github.com/tamura09/trackcut/releases/download/v#{version}/TrackCut-#{version}-arm64.zip"
   name "TrackCut"
